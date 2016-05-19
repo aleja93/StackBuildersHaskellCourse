@@ -20,8 +20,15 @@ module Basis where
 -- >>> toDigits (-17)
 -- []
 
-toDigits :: Integer -> [Integer]
-toDigits = undefined
+toDigitsRev :: Integer -> [Integer]
+toDigitsRev 0 = []
+toDigitsRev x
+  | x<0       = []
+  | otherwise = (x `mod` 10): [] ++ toDigitsRev (x `div` 10)
+
+
+toDigits:: Integer -> [Integer]
+toDigits x= reverse (toDigitsRev x)
 
 ----------------------------------------------------------------------
 -- Exercise 2
@@ -35,7 +42,11 @@ toDigits = undefined
 -- [1,4,3]
 
 doubleEveryOther :: [Integer] -> [Integer]
-doubleEveryOther = undefined
+doubleEveryOther []=[]
+doubleEveryOther [x] = [x]
+doubleEveryOther (x:y:xs)
+  | (length xs) `mod` 2 == 1 = x:y*2: doubleEveryOther(xs)
+  | otherwise = x*2:y: doubleEveryOther(xs)
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -47,7 +58,10 @@ doubleEveryOther = undefined
 -- 22
 
 sumDigits :: [Integer] -> Integer
-sumDigits = undefined
+sumDigits [] = 0
+sumDigits (x:xs)
+  | x>9 = sumDigits(xs) +(x `mod` 10) + (x `div` 10)
+  | otherwise = sumDigits(xs)+x
 
 ----------------------------------------------------------------------
 -- Exercise 4
@@ -61,7 +75,9 @@ sumDigits = undefined
 -- False
 
 validate :: Integer -> Bool
-validate = undefined
+validate x
+  | (sumDigits(doubleEveryOther(toDigits (x)))) `mod` 10 == 0 = True
+  | otherwise =False
 
 ----------------------------------------------------------------------
 -- Exercise 5
@@ -76,7 +92,13 @@ type Move = (Peg, Peg)
 -- [("a","c"),("a","b"),("c","b")]
 
 hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
-hanoi = undefined
+hanoi 0 _ _ _ = []
+hanoi 1 a b _ = [(a,b)]
+hanoi n a b c =
+   hanoi (n-1) a c b  ++
+   hanoi 1 a b c  ++
+   hanoi (n-1) c b a
+
 
 ----------------------------------------------------------------------
 -- Exercise 6 (Optional)
