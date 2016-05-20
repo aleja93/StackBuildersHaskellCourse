@@ -10,6 +10,7 @@
 module LogAnalysis where
 
 import Log
+import Data.Char
 
 ----------------------------------------------------------------------
 -- Exercise 1
@@ -24,11 +25,39 @@ import Log
 -- >>> parseMessage "This is not in the right format"
 -- Unknown "This is not in the right format"
 
+getFirstNumber :: String -> String
+getFirstNumber [] = []
+getFirstNumber (x:xs)
+  | isDigit x = x:[] ++ getFirstNumber(xs)
+  | otherwise = []
+
+getRestMessage :: String -> String -> String
+getRestMessage number s = drop (length number) s
+
+
 parseMessage :: String -> LogMessage
-parseMessage = undefined
+parseMessage [] = Unknown ""
+parseMessage (l:s) = case l of 'E' ->  LogMessage (Error (read sn)) (read ts) (tail (getRestMessage ts (tail s2)))
+                               'I' ->  LogMessage Info (read sn) (tail s2)
+                               'W' ->  LogMessage Warning (read sn) (tail s2)
+                               _ -> Unknown (l:s)
+                               where
+                               sn= getFirstNumber (tail s)
+                               s2= getRestMessage sn (tail s)
+                               ts= getFirstNumber (tail s2)
+
+getLineString :: String -> String
+getLineString []=[]
+getLineString (x:xs)
+  | (ord x) /= 10 = [x]++ getLineString(xs)
+  | otherwise = []
 
 parse :: String -> [LogMessage]
-parse = undefined
+parse [] = []
+parse x = [parseMessage(l)]++parse(rest)
+          where
+          l=getLineString x
+          rest= getRestMessage ( l++" ") x
 
 ----------------------------------------------------------------------
 -- Exercise 2
