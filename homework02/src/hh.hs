@@ -52,18 +52,29 @@ parse x = [parseMessage(l)]++parse(rest)
 
 -- "I 1578 Which brought them back again to the beginning of the conversation.\nW 3955 uhcd nosted)\nI 5071 #72"
 
+m1=parseMessage "I 15 Message1"
+m2=parseMessage "I 20 Message2"
+m3=parseMessage "I 30 Message3"
+m4=parseMessage "I 40 Message4"
+m5=parseMessage "I 20 Message5"
+u=parseMessage "This is not the formatt"
+t1=Leaf
+t2=Node Leaf m2 Leaf
+t3=Node t2 m3 Leaf
+
+
 insert :: LogMessage -> MessageTree -> MessageTree
 insert (Unknown _ ) mto = mto
 insert m Leaf = Node Leaf m Leaf
-insert n@(LogMessage _ ts1 _) (Leaf p@(LogMessage _ ts2 _) Leaf)
-  | ts2>ts1 = Node ((Node Leaf n Leaf) p Leaf)
-  | otherwise = Node (Leaf p (Node Leaf n Leaf))
-insert n@(LogMessage _ ts1 _) (Node mti@(Node _ _ _) (LogMessage _ ts2 _) mtr@(Node _ _ _))
-  | ts2>ts1 = insert n mti
-  | otherwise = insert n mtr
+insert n@(LogMessage _ ts1 _) (Node mti@(Node _ _ _) p@(LogMessage _ ts2 _) Leaf)
+  | ts2>ts1 = Node (insert n mti) p Leaf
+  | otherwise = Node mti p (Node Leaf n Leaf)
 insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) mtr@(Node _ _ _))
   | ts2>ts1 = Node (Node Leaf n Leaf) p mtr
-  | otherwise = insert n mtr
-insert n@(LogMessage _ ts1 x) (Node mti@(Node _ _ _) p@(LogMessage _ ts2 _) Leaf)
-  | ts2>ts1 = insert n mti
-  | otherwise = Node mti p (Node Leaf n Leaf)
+  | otherwise = Node Leaf p (insert n mtr)
+insert n@(LogMessage _ ts1 _) (Node mti@(Node _ _ _) p@(LogMessage _ ts2 _) mtr@(Node _ _ _))
+  | ts2>ts1 = Node (insert n mti) p Leaf
+  | otherwise = Node Leaf p (insert n mtr)
+insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) Leaf)
+  | ts2>ts1 = Node (Node Leaf n Leaf) p Leaf
+  | otherwise = Node Leaf p (Node Leaf n Leaf)

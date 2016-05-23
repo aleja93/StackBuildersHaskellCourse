@@ -69,7 +69,20 @@ parse x = [parseMessage(l)]++parse(rest)
 --
 
 insert :: LogMessage -> MessageTree -> MessageTree
-insert = undefined
+insert (Unknown _ ) mto = mto
+insert m Leaf = Node Leaf m Leaf
+insert n@(LogMessage _ ts1 _) (Node mti@(Node _ _ _) p@(LogMessage _ ts2 _) Leaf)
+  | ts2>ts1 = Node (insert n mti) p Leaf
+  | otherwise = Node mti p (Node Leaf n Leaf)
+insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) mtr@(Node _ _ _))
+  | ts2>ts1 = Node (Node Leaf n Leaf) p mtr
+  | otherwise = Node Leaf p (insert n mtr)
+insert n@(LogMessage _ ts1 _) (Node mti@(Node _ _ _) p@(LogMessage _ ts2 _) mtr@(Node _ _ _))
+  | ts2>ts1 = Node (insert n mti) p Leaf
+  | otherwise = Node Leaf p (insert n mtr)
+insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) Leaf)
+  | ts2>ts1 = Node (Node Leaf n Leaf) p Leaf
+  | otherwise = Node Leaf p (Node Leaf n Leaf)
 
 ----------------------------------------------------------------------
 -- Exercise 3
