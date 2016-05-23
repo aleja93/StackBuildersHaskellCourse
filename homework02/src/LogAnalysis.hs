@@ -78,11 +78,12 @@ insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) mtr@(Node _ _ _)
   | ts2>ts1 = Node (Node Leaf n Leaf) p mtr
   | otherwise = Node Leaf p (insert n mtr)
 insert n@(LogMessage _ ts1 _) (Node mti@(Node _ _ _) p@(LogMessage _ ts2 _) mtr@(Node _ _ _))
-  | ts2>ts1 = Node (insert n mti) p Leaf
-  | otherwise = Node Leaf p (insert n mtr)
+  | ts2>ts1 = Node (insert n mti) p mtr
+  | otherwise = Node mti p (insert n mtr)
 insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) Leaf)
   | ts2>ts1 = Node (Node Leaf n Leaf) p Leaf
   | otherwise = Node Leaf p (Node Leaf n Leaf)
+
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -94,7 +95,9 @@ insert n@(LogMessage _ ts1 _) (Node Leaf p@(LogMessage _ ts2 _) Leaf)
 --
 
 build :: [LogMessage] -> MessageTree
-build = undefined
+build [] = Leaf
+build [x] = insert x Leaf
+build (x:xs) = insert x (build xs)
 
 ----------------------------------------------------------------------
 -- Exercise 4
@@ -106,7 +109,11 @@ build = undefined
 --
 
 inOrder :: MessageTree -> [LogMessage]
-inOrder = undefined
+inOrder Leaf= []
+inOrder (Node Leaf m Leaf) = [m]
+inOrder (Node mtl@(Node _ _ _) m Leaf) = inOrder(mtl)++[m]
+inOrder (Node Leaf m mtr@(Node _ _ _)) = [m]++inOrder(mtr)
+inOrder (Node mtl@(Node _ _ _) m mtr@(Node _ _ _)) = inOrder(mtl)++[m]++inOrder(mtr)
 
 ----------------------------------------------------------------------
 -- Exercise 5
@@ -118,7 +125,10 @@ inOrder = undefined
 --
 
 whatWentWrong :: [LogMessage] -> [String]
-whatWentWrong = undefined
+whatWentWrong []=[]
+whatWentWrong ( (LogMessage _ ts m) :xs)
+  | ts>50 = [m]++ whatWentWrong( inOrder (build xs))
+  | otherwise = whatWentWrong(inOrder (build xs))
 
 ----------------------------------------------------------------------
 -- Exercise 6 (Optional)
