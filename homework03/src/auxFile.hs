@@ -88,11 +88,12 @@ fAst n
   | n>0 = '*'
   | otherwise = ' '
 
-asterisk :: [Int] -> String
+asterisk :: [Integer] -> String
 asterisk []=[]
 asterisk x
   | (foldl(+) 0 x) > 0 =  map fAst x ++"\n"++ (asterisk(takeOne x))
-  | otherwise =[]
+  | otherwise ="=========\n0123456789\n"
+
 
 histogram :: [Integer] -> String
-histogram _ = []
+histogram x = asterisk ( countElement x [0,1,2,3,4,5,6,7,8,9])
