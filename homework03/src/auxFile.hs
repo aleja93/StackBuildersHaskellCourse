@@ -39,7 +39,6 @@ takeNTimes x n = [(takeNthElements x n)] ++ takeNTimes x (n - 1)
 skips :: [a] -> [[a]]
 skips x = reverse (takeNTimes x (length x))
 
-----------------------------------------------------------------------
 -- Exercise 2
 ----------------------------------------------------------------------
 
@@ -72,15 +71,28 @@ localMaxima (x:y:z:xs)
 -- >>> histogram [1,1,1,5]
 -- " *        \n *        \n *   *    \n==========\n0123456789\n"
 
-
---
--- countElement :: [a] -> a -> Integer
--- countElement x b = foldl(+) 0 (filter (==b) x)
-
-countElement :: [a] -> [a] -> [Integer]
+countElement :: [Int] -> [Int] -> [Int]
 countElement _ [] = []
-countElement l (x:xs) = [foldl(+) 0 (filter (==x) l)]++ (countElement l xs)
+countElement l (x:xs) = [length (filter (==x) l)]++ (countElement l xs)
 
+takeOne :: [Int] -> [Int]
+takeOne []=[]
+takeOne (x:xs)
+  | x>0 = [x-1] ++ takeOne xs
+  | otherwise = [x] ++ takeOne xs
+
+-- c= countElement x [0,1,2,3,4,5,6,7,8,9]
+
+fAst ::Int -> Char
+fAst n
+  | n>0 = '*'
+  | otherwise = ' '
+
+asterisk :: [Int] -> String
+asterisk []=[]
+asterisk x
+  | (foldl(+) 0 x) > 0 =  map fAst x ++"\n"++ (asterisk(takeOne x))
+  | otherwise =[]
 
 histogram :: [Integer] -> String
-histogram = undefined
+histogram _ = []

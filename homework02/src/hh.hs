@@ -103,7 +103,7 @@ inOrder (Node mtl@(Node _ _ _) m Leaf) = inOrder(mtl)++[m]
 inOrder (Node Leaf m mtr@(Node _ _ _)) = [m]++inOrder(mtr)
 inOrder (Node mtl@(Node _ _ _) m mtr@(Node _ _ _)) = inOrder(mtl)++[m]++inOrder(mtr)
 
-messages= "I 20 Which brought \nW 60 it is \nI 55 Today \nThis is not\nI 11 had vanished completely.\nW 61 a great day"
+messages= "W 60 it is \nI 55 Today \nThis is not\nI 11 had vanished completely.\nW 61 a great day"
 listM=parse messages
 listMinOrder= inOrder (build listM)
 
