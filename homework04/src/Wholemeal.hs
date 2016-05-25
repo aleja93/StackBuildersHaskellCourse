@@ -17,11 +17,27 @@ fun1 (x:xs)
     | even x    = (x - 2) * fun1 xs
     | otherwise = fun1 xs
 
+fun1' :: [Integer] -> Integer
+fun1' x= product (map (subtract 2) (filter even x))
+
+
 fun2 :: Integer -> Integer
 fun2 1 = 0
 fun2 n
   | even n    = n + fun2 (n `div` 2)
   | otherwise = fun2 (3*n + 1)
+
+fun :: Integer -> Integer
+fun n
+  | even n    = n `div` 2
+  | otherwise = 3*n + 1
+
+fun3 :: Integer -> Integer
+fun3 n = if even n then (n `div` 2) else (3*n + 1)
+
+fun2' :: Integer -> Integer
+fun2' n = sum (filter even (takeWhile (>1) (iterate (\x -> if even x then (x `div` 2) else (3*x + 1)) n)))
+
 
 -- |
 --
@@ -33,12 +49,6 @@ fun2 n
 -- True
 -- >>> fun2 15 /= fun2' 15
 -- False
-
-fun1' :: [Integer] -> Integer
-fun1' = undefined
-
-fun2' :: Integer -> Integer
-fun2' = undefined
 
 ----------------------------------------------------------------------
 -- Exercise 2
