@@ -71,11 +71,11 @@ localMaxima (x:y:z:xs)
 -- >>> histogram [1,1,1,5]
 -- " *        \n *        \n *   *    \n==========\n0123456789\n"
 
-countElement :: [Int] -> [Int] -> [Int]
+countElement :: [Integer] -> [Integer] -> [Integer]
 countElement _ [] = []
-countElement l (x:xs) = [length (filter (==x) l)]++ (countElement l xs)
+countElement l (x:xs) = [toInteger(length (filter (==x) l))]++ (countElement l xs)
 
-takeOne :: [Int] -> [Int]
+takeOne :: [Integer] -> [Integer]
 takeOne []=[]
 takeOne (x:xs)
   | x>0 = [x-1] ++ takeOne xs
@@ -83,7 +83,7 @@ takeOne (x:xs)
 
 -- c= countElement x [0,1,2,3,4,5,6,7,8,9]
 
-fAst ::Int -> Char
+fAst ::Integer -> Char
 fAst n
   | n>0 = '*'
   | otherwise = ' '

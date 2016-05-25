@@ -63,6 +63,7 @@ localMaxima (x:y:z:xs)
   | (localMaximaOneNumber x y z) = [y] ++ localMaxima (y:z:xs)
   | otherwise  = localMaxima (y:z:xs)
 
+
 ----------------------------------------------------------------------
 -- Exercise 3
 ----------------------------------------------------------------------
@@ -72,15 +73,29 @@ localMaxima (x:y:z:xs)
 -- >>> histogram [1,1,1,5]
 -- " *        \n *        \n *   *    \n==========\n0123456789\n"
 
-
---
--- countElement :: [a] -> a -> Integer
--- countElement x b = foldl(+) 0 (filter (==b) x)
-
-countElement :: [a] -> [a] -> [Integer]
+countElement :: [Integer] -> [Integer] -> [Integer]
 countElement _ [] = []
-countElement l (x:xs) = [foldl(+) 0 (filter (==x) l)]++ (countElement l xs)
+countElement l (x:xs) = [toInteger(length (filter (==x) l))]++ (countElement l xs)
+
+takeOne :: [Integer] -> [Integer]
+takeOne []=[]
+takeOne (x:xs)
+  | x>0 = [x-1] ++ takeOne xs
+  | otherwise = [x] ++ takeOne xs
+
+-- c= countElement x [0,1,2,3,4,5,6,7,8,9]
+
+fAst ::Integer -> Char
+fAst n
+  | n>0 = '*'
+  | otherwise = ' '
+
+asterisk :: [Integer] -> String
+asterisk []=[]
+asterisk x
+  | (foldl(+) 0 x) > 0 =  map fAst x ++"\n"++ (asterisk(takeOne x))
+  | otherwise ="=========\n0123456789\n"
 
 
 histogram :: [Integer] -> String
-histogram = undefined
+histogram x = asterisk ( countElement x [0,1,2,3,4,5,6,7,8,9])
