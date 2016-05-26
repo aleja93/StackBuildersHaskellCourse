@@ -110,7 +110,7 @@ printT (Node h l a r) =space ++(show h)++" "++[a]++"\n"++space++(printT l)++"\n"
 -- False
 
 xor :: [Bool] -> Bool
-xor = undefined
+xor xs = odd (foldl (\acc x -> if x then (acc+1) else acc) 0 xs)
 
 -- |
 --
@@ -118,12 +118,12 @@ xor = undefined
 -- [2,3,4]
 
 map' :: (a -> b) -> [a] -> [b]
-map' = undefined
+map' f xs = foldr (\x acc -> (f x):acc) [] xs
 
 -- Optional
 
-myFoldl :: (a -> b -> a) -> a -> [b] -> a
-myFoldl = undefined
+--myFoldl :: (a -> b -> a) -> a -> [b] -> a
+--myFoldl f base xs = foldr (\x acc -> (f x):acc) base xs
 
 ----------------------------------------------------------------------
 -- Exercise 4
@@ -131,3 +131,29 @@ myFoldl = undefined
 
 sieveSundaram :: Integer -> [Integer]
 sieveSundaram = undefined
+
+listi= take (100 `div` 2) [1..]
+listj= take (100 `div` 2) [1..]
+
+cartProd :: [a] -> [b] -> [(a, b)]
+cartProd xs ys = [(x,y) | x <- xs, y <- ys]
+
+rule :: (Integer,Integer) -> Integer
+rule (a,b) = a+b+(2*a*b)
+
+takeOutRepetedNumbers :: [Integer] -> [Integer]
+takeOutRepetedNumbers []=[]
+takeOutRepetedNumbers (x:xs)
+  | length (filter (==x) (x:xs)) >1 = takeOutRepetedNumbers xs
+  | otherwise = x:takeOutRepetedNumbers xs
+---
+
+--takeOutNotExistingNumbers :: [Integer] -> [Integer] -> [Integer]
+--takeOutNotExistingNumbers [] _ =[]
+--takeOutNotExistingNumbers (x:xs) y
+--  | length (filter (==x) y) >0 = takeOutNotExistingNumbers xs
+--  | otherwise = x:takeOutNotExistingNumbers xs
+
+
+notN :: [(Integer, Integer)] -> [Integer]
+notN xs = takeOutRepetedNumbers(filter (<100) (map rule xs))
