@@ -7,6 +7,8 @@
 
 module Wholemeal where
 
+import Data.Char
+
 ----------------------------------------------------------------------
 -- Exercise 1
 ----------------------------------------------------------------------
@@ -60,7 +62,41 @@ data Tree a =
     deriving (Show, Eq)
 
 foldTree :: [a] -> Tree a
-foldTree = undefined
+foldTree x = foldr (insertNode) Leaf x
+
+t1= insertNode 'A' Leaf
+t2= insertNode 'B' t1
+t3= insertNode 'C' t2
+t4= insertNode 'D' t3
+t5= insertNode 'E' t4
+t6= insertNode 'F' t5
+t7= insertNode 'G' t6
+t8= insertNode 'H' t7
+t9= insertNode 'I' t8
+
+insertNode :: a -> Tree a -> Tree a
+insertNode x Leaf = Node 0 Leaf x Leaf
+insertNode x (Node h Leaf a Leaf) = Node (h+1) Leaf a (Node 0 Leaf x Leaf)
+insertNode x (Node h nodel@(Node _ _ _ _) a Leaf) = Node h nodel a (Node 0 Leaf x Leaf)
+insertNode x (Node h Leaf a noder@(Node _ _ _ _)) = Node h (Node 0 Leaf x Leaf) a noder
+insertNode x (Node h nodel@(Node _ _ _ _) a noder@(Node _ _ _ _))
+  | (checkNumberNodes noder)==0 = Node (h+1) nodel a (insertNode x noder)
+  | (checkNumberNodes noder)==1 = Node h nodel a (insertNode x noder)
+  | (checkNumberNodes nodel)<2 = Node h (insertNode x nodel) a noder
+  | (checkNumberNodes nodel) == (checkNumberNodes noder) = Node (h+1) nodel a (insertNode x noder)
+
+checkNumberNodes ::Tree a -> Int
+checkNumberNodes (Node _ Leaf _ Leaf) = 0
+checkNumberNodes (Node _ (Node _ _ _ _) _ Leaf)=1
+checkNumberNodes (Node _ Leaf _ (Node _ _ _ _))=1
+checkNumberNodes (Node _ (Node _ _ _ _) _ (Node _ _ _ _))=2
+
+
+printT :: Tree Char -> String
+printT Leaf = (replicate 2' ')++"leaf"
+printT (Node h l a r) =space ++(show h)++" "++[a]++"\n"++space++(printT l)++"\n"++space++(printT r)++"\n"
+   where
+     space= replicate (fromIntegral (h*2)) ' '
 
 ----------------------------------------------------------------------
 -- Exercise 3
