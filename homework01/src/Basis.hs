@@ -45,8 +45,8 @@ doubleEveryOther :: [Integer] -> [Integer]
 doubleEveryOther []=[]
 doubleEveryOther [x] = [x]
 doubleEveryOther (x:y:xs)
-  | (length xs) `mod` 2 == 1 = x:y*2: doubleEveryOther(xs)
-  | otherwise = x*2:y: doubleEveryOther(xs)
+  | length xs `mod` 2 == 1 = x:y*2: doubleEveryOther xs
+  | otherwise = x*2:y: doubleEveryOther xs
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -60,8 +60,8 @@ doubleEveryOther (x:y:xs)
 sumDigits :: [Integer] -> Integer
 sumDigits [] = 0
 sumDigits (x:xs)
-  | x>9 = sumDigits(xs) +(x `mod` 10) + (x `div` 10)
-  | otherwise = sumDigits(xs)+x
+  | x>9 = sumDigits xs +(x `mod` 10) + (x `div` 10)
+  | otherwise = sumDigits xs +x
 
 ----------------------------------------------------------------------
 -- Exercise 4
@@ -76,7 +76,7 @@ sumDigits (x:xs)
 
 validate :: Integer -> Bool
 validate x
-  | (sumDigits(doubleEveryOther(toDigits (x)))) `mod` 10 == 0 = True
+  | sumDigits(doubleEveryOther(toDigits x)) `mod` 10 == 0 = True
   | otherwise =False
 
 ----------------------------------------------------------------------
