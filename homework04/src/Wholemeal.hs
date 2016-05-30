@@ -130,10 +130,12 @@ map' f xs = foldr (\x acc -> (f x):acc) [] xs
 ----------------------------------------------------------------------
 
 sieveSundaram :: Integer -> [Integer]
-sieveSundaram = undefined
-
-listi= take (100 `div` 2) [1..]
-listj= take (100 `div` 2) [1..]
+sieveSundaram n = map (\x -> (x*2)+1) ( takeOutNotExistingNumbers list (takeOutRepetedNumbers(filter (<top) (map rule s))) )
+  where
+    top= fromIntegral (n+2)
+    list = take (fromIntegral n) [1..]
+    listp= take (fromIntegral top `div` 2) [1..]
+    s = cartProd listp listp
 
 cartProd :: [a] -> [b] -> [(a, b)]
 cartProd xs ys = [(x,y) | x <- xs, y <- ys]
@@ -146,14 +148,9 @@ takeOutRepetedNumbers []=[]
 takeOutRepetedNumbers (x:xs)
   | length (filter (==x) (x:xs)) >1 = takeOutRepetedNumbers xs
   | otherwise = x:takeOutRepetedNumbers xs
----
 
---takeOutNotExistingNumbers :: [Integer] -> [Integer] -> [Integer]
---takeOutNotExistingNumbers [] _ =[]
---takeOutNotExistingNumbers (x:xs) y
---  | length (filter (==x) y) >0 = takeOutNotExistingNumbers xs
---  | otherwise = x:takeOutNotExistingNumbers xs
-
-
-notN :: [(Integer, Integer)] -> [Integer]
-notN xs = takeOutRepetedNumbers(filter (<100) (map rule xs))
+takeOutNotExistingNumbers :: [Integer] -> [Integer] -> [Integer] -- takeOutNotExistingNumbers [1,2,3] [1] == [2,3]
+takeOutNotExistingNumbers [] _ =[]
+takeOutNotExistingNumbers (x:xs) y
+  | x `elem` y = takeOutNotExistingNumbers xs y
+  | otherwise = x:takeOutNotExistingNumbers xs y
