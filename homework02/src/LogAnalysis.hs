@@ -28,11 +28,11 @@ import Data.Char
 getFirstNumber :: String -> String
 getFirstNumber [] = []
 getFirstNumber (x:xs)
-  | isDigit x = x:[] ++ getFirstNumber(xs)
+  | isDigit x = x:[] ++ getFirstNumber xs
   | otherwise = []
 
 getRestMessage :: String -> String -> String
-getRestMessage number s = drop (length number) s
+getRestMessage number = drop (length number)
 
 
 parseMessage :: String -> LogMessage
@@ -49,12 +49,12 @@ parseMessage (l:s) = case l of 'E' ->  LogMessage (Error (read sn)) (read ts) (t
 getLineString :: String -> String
 getLineString []=[]
 getLineString (x:xs)
-  | (ord x) /= 10 = [x]++ getLineString(xs)
+  | ord x /= 10 = x:getLineString xs
   | otherwise = []
 
 parse :: String -> [LogMessage]
 parse [] = []
-parse x = [parseMessage(l)]++parse(rest)
+parse x = parseMessage l : parse rest
           where
           l=getLineString x
           rest= getRestMessage ( l++" ") x
@@ -111,9 +111,9 @@ build (x:xs) = insert x (build xs)
 inOrder :: MessageTree -> [LogMessage]
 inOrder Leaf= []
 inOrder (Node Leaf m Leaf) = [m]
-inOrder (Node mtl@(Node _ _ _) m Leaf) = inOrder(mtl)++[m]
-inOrder (Node Leaf m mtr@(Node _ _ _)) = [m]++inOrder(mtr)
-inOrder (Node mtl@(Node _ _ _) m mtr@(Node _ _ _)) = inOrder(mtl)++[m]++inOrder(mtr)
+inOrder (Node mtl@(Node _ _ _) m Leaf) = inOrder mtl ++[m]
+inOrder (Node Leaf m mtr@(Node _ _ _)) = m : inOrder mtr
+inOrder (Node mtl@(Node _ _ _) m mtr@(Node _ _ _)) = inOrder mtl ++[m]++inOrder mtr
 
 ----------------------------------------------------------------------
 -- Exercise 5
@@ -126,8 +126,8 @@ inOrder (Node mtl@(Node _ _ _) m mtr@(Node _ _ _)) = inOrder(mtl)++[m]++inOrder(
 
 whatWentWrong :: [LogMessage] -> [String]
 whatWentWrong []=[]
-whatWentWrong ( (LogMessage _ ts m) :xs)
-  | ts>50 = [m]++ whatWentWrong( inOrder (build xs))
+whatWentWrong ( LogMessage _ ts m :xs)
+  | ts>50 = m : whatWentWrong( inOrder (build xs))
   | otherwise = whatWentWrong(inOrder (build xs))
 
 ----------------------------------------------------------------------
