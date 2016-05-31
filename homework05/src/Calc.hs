@@ -20,20 +20,35 @@ import qualified Data.Map as M
 ----------------------------------------------------------------------
 
 -- |
---
+-- (2+3)*4
 -- >>> eval (ExprT.Mul (ExprT.Add (ExprT.Lit 2) (ExprT.Lit 3)) (ExprT.Lit 4)) == 20
 -- True
 
 eval :: ExprT -> Integer
-eval = undefined
-
+eval (ExprT.Lit x) = x
+eval (ExprT.Add a b)= eval a + eval b
+eval (ExprT.Mul a b)= eval a * eval b
 
 ----------------------------------------------------------------------
 -- Exercise 2
 ----------------------------------------------------------------------
 
+-------------------
+-- *
+-- Calc> parseExp ExprT.Lit ExprT.Add ExprT.Mul "(2+3)*4"
+-- Just (Mul (Add (Lit 2) (Lit 3)) (Lit 4))
+-- Calc> parseExp ExprT.Lit ExprT.Add ExprT.Mul "2+3*4"
+-- Just (Add (Lit 2) (Mul (Lit 3) (Lit 4)))
+-- Calc> parseExp ExprT.Lit ExprT.Add ExprT.Mul "2+3*"
+-- Nothing
+------
+
 evalStr :: String -> Maybe Integer
-evalStr = undefined
+evalStr a = case expression of
+                   Nothing -> Nothing
+                   Just x  -> Just (eval x)
+                   where
+                     expression = parseExp ExprT.Lit ExprT.Add ExprT.Mul a
 
 
 ----------------------------------------------------------------------
@@ -44,6 +59,29 @@ evalStr = undefined
 --
 -- >>> reify $ mul (add (lit 2) (lit 3)) (lit 4)
 -- Mul (Add (Lit 2) (Lit 3)) (Lit 4)
+
+-- class Listable a where
+--   toList :: a -> [Int]
+--   toList :: Listable a => a -> [Int]
+--
+-- instance Listable Int where
+  -- toList :: Int -> [Int]
+--   toList x = [x]
+
+-- instance Listable Bool where
+--   toList True  = [1]
+--   toList False = [0]
+
+class Expr a where
+  lit :: Integer -> a
+  add :: a -> a -> a
+  mul :: a -> a -> a
+
+instance Expr ExprT where
+  lit x = ExprT.Lit x
+  add a b = ExprT.Add a b
+  mul a b = ExprT.Mul a b
+
 
 reify :: ExprT -> ExprT
 reify = id
