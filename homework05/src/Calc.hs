@@ -11,6 +11,7 @@
 module Calc where
 
 import ExprT
+import VarExprT
 import Parser
 import StackVM
 import qualified Data.Map as M
@@ -25,7 +26,7 @@ import qualified Data.Map as M
 -- True
 
 eval :: ExprT -> Integer
-eval (ExprT.Lit x) = x
+eval (ExprT.Lit x)  = x
 eval (ExprT.Add a b)= eval a + eval b
 eval (ExprT.Mul a b)= eval a * eval b
 
@@ -60,25 +61,14 @@ evalStr a = case expression of
 -- >>> reify $ mul (add (lit 2) (lit 3)) (lit 4)
 -- Mul (Add (Lit 2) (Lit 3)) (Lit 4)
 
--- class Listable a where
---   toList :: a -> [Int]
---   toList :: Listable a => a -> [Int]
---
--- instance Listable Int where
-  -- toList :: Int -> [Int]
---   toList x = [x]
-
--- instance Listable Bool where
---   toList True  = [1]
---   toList False = [0]
 
 class Expr a where
   lit :: Integer -> a
-  add :: a -> a -> a
-  mul :: a -> a -> a
+  add :: a -> a  -> a
+  mul :: a -> a  -> a
 
 instance Expr ExprT where
-  lit x = ExprT.Lit x
+  lit x   = ExprT.Lit x
   add a b = ExprT.Add a b
   mul a b = ExprT.Mul a b
 
@@ -90,12 +80,44 @@ reify = id
 -- Exercise 4
 ----------------------------------------------------------------------
 
+instance Expr Integer where
+  lit x   = x
+  add a b = a+b
+  mul a b = a*b
+
+instance Expr Bool where
+  lit x   = if  x>0 then True else False
+  add a b = a || b
+  mul a b = a && b
+
+
 newtype MinMax  = MinMax Integer deriving (Eq, Show)
 newtype Mod7    = Mod7 Integer deriving (Eq, Show)
+
+instance Expr MinMax where
+  lit x                     = MinMax x
+  add (MinMax a) (MinMax b) = MinMax (max a b)
+  mul (MinMax a) (MinMax b) = MinMax (min a b)
+
+instance Expr Mod7 where
+  lit x                 = Mod7 x
+  add (Mod7 a) (Mod7 b) = Mod7 (mod (a+b) 7)
+  mul (Mod7 a) (Mod7 b) = Mod7 (mod (a*b) 7)
+
+
+testExp :: Expr a => Maybe a
+testExp = parseExp lit add mul "(3 * -4) + 5"
+
+testInteger  = testExp :: Maybe Integer     -- Just (-7)
+testBool     = testExp :: Maybe Bool        -- Just True
+testMM       = testExp :: Maybe MinMax      -- Just (MinMax 5)
+testSat      = testExp :: Maybe Mod7        -- Just (Mod7 0)
+
 
 ----------------------------------------------------------------------
 -- Exercise 5 (do this OR exercise 6)
 ----------------------------------------------------------------------
+
 
 compile :: String -> Maybe Program
 compile = undefined
@@ -115,6 +137,19 @@ compile = undefined
 -- Nothing
 -- >>> withVars [("x", 6), ("y", 3)] $ mul (var "x") (add (var "y") (var "x"))
 -- Just 54
+
+class HasVars a where
+  var :: String -> a
+
+instance Expr VarExprT where
+  lit x   = VarExprT.Lit x
+  add a b = VarExprT.Add a b
+  mul a b = VarExprT.Mul a b
+
+instance HasVars VarExprT where
+  var x   = VarExprT.Var x
+
+
 
 withVars :: [(String, Integer)]
          -> (M.Map String Integer -> Maybe Integer)
