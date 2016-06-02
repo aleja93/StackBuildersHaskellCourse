@@ -12,10 +12,15 @@ module Fibonacci where
 ----------------------------------------------------------------------
 
 fib :: Integer -> Integer
-fib = undefined
+fib x
+  | x<0       = -1
+  | x==0      =  0
+  | x==1      =  1
+  | otherwise =  fib (x-1) + fib (x-2)
+
 
 fibs1 :: [Integer]
-fibs1 = undefined
+fibs1 = map fib [0..]
 
 
 ----------------------------------------------------------------------
@@ -23,7 +28,14 @@ fibs1 = undefined
 ----------------------------------------------------------------------
 
 fibs2 :: [Integer]
-fibs2 = undefined
+fibs2 =  (0):(b):(c):(c+b):(c+(c+b)):[] where
+  b = 1
+  c = a+b
+
+tres :: Integer -> Integer -> Integer
+tres a b = a+b
+
+-- foldr (\x acc -> f x : acc)
 
 
 ----------------------------------------------------------------------
