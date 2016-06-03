@@ -150,6 +150,24 @@ instance HasVars VarExprT where
   var x   = VarExprT.Var x
 
 
+--instance HasVars (M.Map String Integer -> Maybe Integer) where
+--  var
+
+fun :: String -> M.Map String Integer -> [(String,Integer)]
+fun x mi@(M.toList a)
+  | x== (fun1 mi) = Just 5
+  | otherwise = Nothing
+
+
+fun1 :: [(String,Integer)] -> String
+fun1 (a,b):_ = a
+
+fun2 :: String -> Integer -> [(String,Integer)]
+fun2 k v = [(k,v)]
+--instance Expr (M.Map String Integer -> Maybe Integer)
+
+
+
 
 withVars :: [(String, Integer)]
          -> (M.Map String Integer -> Maybe Integer)
