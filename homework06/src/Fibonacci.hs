@@ -28,24 +28,25 @@ fibs1 = map fib [0..]
 ----------------------------------------------------------------------
 
 fibs2 :: [Integer]
-fibs2 =  (0):(b):(c):(c+b):(c+(c+b)):[] where
-  b = 1
-  c = a+b
+fibs2 = 0: fun 0 1
 
-tres :: Integer -> Integer -> Integer
-tres a b = a+b
-
--- foldr (\x acc -> f x : acc)
-
+fun :: Integer -> Integer -> [Integer]
+fun a b = b:fun b (a+b)
 
 ----------------------------------------------------------------------
 -- Exercise 3
 ----------------------------------------------------------------------
 
-data Stream a
+data Stream a = Cons a (Stream a)
+
+instance Show a => Show (Stream a) where
+  show (Cons a x)= take 100 (show a ++" "++show x)
 
 streamToList :: Stream a -> [a]
-streamToList = undefined
+streamToList (Cons a x) = a:streamToList x
+
+listToStream :: [a] -> Stream a
+listToStream (x:xs) = Cons x (listToStream xs)
 
 
 ----------------------------------------------------------------------
@@ -53,26 +54,29 @@ streamToList = undefined
 ----------------------------------------------------------------------
 
 streamRepeat :: a -> Stream a
-streamRepeat = undefined
+streamRepeat x = listToStream(repeat x)
 
 streamMap :: (a -> b) -> Stream a -> Stream b
-streamMap = undefined
+streamMap f (Cons a x) = Cons (f a) (streamMap f x)
 
 streamFromSeed :: (a -> a) -> a -> Stream a
-streamFromSeed = undefined
-
+streamFromSeed f a = Cons a ( streamFromSeed f (f a))
 
 ----------------------------------------------------------------------
 -- Exercise 5
 ----------------------------------------------------------------------
 
 nats :: Stream Integer
-nats = undefined
+nats = streamFromSeed (+1) 1
 
 ruler :: Stream Integer
-ruler = undefined
+ruler = streamMap maxNumberOfTwo nats
 
+maxNumberOfTwo :: Integer -> Integer
+maxNumberOfTwo x = if even x then 1+ maxNumberOfTwo (x `div` 2) else 0
 
+takeOneCero :: [Integer] -> [Integer]
+takeOneCero (x:xs) = if x/=0 && x/=1 then x:takeOneCero xs else takeOneCero xs
 ----------------------------------------------------------------------
 -- Exercise 6 (Optional)
 ----------------------------------------------------------------------
