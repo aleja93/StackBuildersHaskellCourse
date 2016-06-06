@@ -68,9 +68,9 @@ class Expr a where
   mul :: a -> a  -> a
 
 instance Expr ExprT where
-  lit x   = ExprT.Lit x
-  add a b = ExprT.Add a b
-  mul a b = ExprT.Mul a b
+  lit = ExprT.Lit
+  add = ExprT.Add
+  mul = ExprT.Mul
 
 
 reify :: ExprT -> ExprT
@@ -86,7 +86,7 @@ instance Expr Integer where
   mul a b = a*b
 
 instance Expr Bool where
-  lit x   = if  x>0 then True else False
+  lit x   = x>0
   add a b = a || b
   mul a b = a && b
 
@@ -95,12 +95,12 @@ newtype MinMax  = MinMax Integer deriving (Eq, Show)
 newtype Mod7    = Mod7 Integer deriving (Eq, Show)
 
 instance Expr MinMax where
-  lit x                     = MinMax x
+  lit                       = MinMax
   add (MinMax a) (MinMax b) = MinMax (max a b)
   mul (MinMax a) (MinMax b) = MinMax (min a b)
 
 instance Expr Mod7 where
-  lit x                 = Mod7 x
+  lit                   = Mod7
   add (Mod7 a) (Mod7 b) = Mod7 (mod (a+b) 7)
   mul (Mod7 a) (Mod7 b) = Mod7 (mod (a*b) 7)
 
@@ -142,31 +142,44 @@ class HasVars a where
   var :: String -> a
 
 instance Expr VarExprT where
-  lit x   = VarExprT.Lit x
-  add a b = VarExprT.Add a b
-  mul a b = VarExprT.Mul a b
+  lit = VarExprT.Lit
+  add = VarExprT.Add
+  mul = VarExprT.Mul
 
 instance HasVars VarExprT where
-  var x   = VarExprT.Var x
+  var = VarExprT.Var
 
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+  var = findVar
 
---instance HasVars (M.Map String Integer -> Maybe Integer) where
---  var
+findVar :: String -> M.Map String Integer -> Maybe Integer
+findVar s a = funFind s (M.toList a)
 
-fun :: String -> M.Map String Integer -> [(String,Integer)]
-fun x mi@(M.toList a)
-  | x== (fun1 mi) = Just 5
-  | otherwise = Nothing
+funFind :: Eq a => a -> [(a,Integer)] -> Maybe Integer
+funFind s [] = Nothing
+funFind s ((k,v):xs)
+  | s==k = Just v
+  | otherwise = funFind s xs
 
+instance Expr (M.Map String Integer -> Maybe Integer) where
+  lit = fooMaybe
+  add = fooAdd
+  mul = fooMul
 
-fun1 :: [(String,Integer)] -> String
-fun1 (a,b):_ = a
+fooMaybe :: Integer -> M.Map String Integer -> Maybe Integer
+fooMaybe s _ = Just s
 
-fun2 :: String -> Integer -> [(String,Integer)]
-fun2 k v = [(k,v)]
---instance Expr (M.Map String Integer -> Maybe Integer)
+fooAdd :: (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer) -> M.Map String Integer -> Maybe Integer
+fooAdd f1 f2 a= opeMaybe (f1 a) (f2 a) "add"
 
+fooMul :: (M.Map String Integer -> Maybe Integer) -> (M.Map String Integer -> Maybe Integer) -> M.Map String Integer -> Maybe Integer
+fooMul f1 f2 a= opeMaybe (f1 a) (f2 a) "mul"
 
+opeMaybe :: Maybe Integer -> Maybe Integer -> String -> Maybe Integer
+opeMaybe Nothing _ _             = Nothing
+opeMaybe _ Nothing _             = Nothing
+opeMaybe (Just x) (Just y) "add" = Just (x+y)
+opeMaybe (Just x) (Just y) "mul" = Just (x*y)
 
 
 withVars :: [(String, Integer)]
