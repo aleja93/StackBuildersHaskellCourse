@@ -5,12 +5,13 @@
 --
 ----------------------------------------------------------------------
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE TypeSynonymInstance #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 
 module JoinList where
 
 import Sized
 import Scrabble
+import Buffer
 
 data JoinList m a = Empty
                   | Single m a
@@ -104,12 +105,31 @@ scoreLine x = Single (scoreString x) x
 -- Exercise 4
 ----------------------------------------------------------------------
 
+jlToString :: (JoinList (Score, Size) String) -> String
+jlToString Empty        = []
+jlToString (Single _ v) = v
+jlToString (Append _ l r) = jlToString l ++ jlToString r
+
+
+jlFromString :: String -> (JoinList (Score, Size) String)
+jlFromString [] = Empty
+jlFromString a  = Single (scoreString a, Size 1) a
+
+jlCount :: (JoinList (Score, Size) String) -> Int
+jlCount Empty        = 0
+jlCount (Single _ _) = 1
+jlCount (Append _ l r) = jlCount l + jlCount r
+
+
+jlValue :: (JoinList (Score, Size) String) -> Int
+jlValue Empty        = 0
+jlValue (Single _ v) = getScore(scoreString v)
+jlValue (Append _ l r) = jlValue l + jlValue r
+
 instance Buffer (JoinList (Score, Size) String) where
-  toString     = fold (++) "" jlToList
-  fromString   = id
-  line n b     = safeIndex n (lines b)
-  replaceLine n l = unlines . uncurry replaceLine' . splitAt n . lines
-      where replaceLine' pre [] = pre
-            replaceLine' pre (_:ls) = pre ++ l:ls
-  numLines     = length . lines
-  value        = length . words
+  toString          = jlToString
+  fromString        = jlFromString
+  line n b          = indexJ n b
+  replaceLine n l b = (takeJ n b) +++ (jlFromString l) +++ (dropJ (n+1) b)
+  numLines          = jlCount
+  value             = jlValue

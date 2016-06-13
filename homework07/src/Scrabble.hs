@@ -16,10 +16,13 @@ newtype Score = Score Int
   deriving (Eq, Ord, Show, Num)
 
 
+
 instance Monoid Score where
   mempty  = Score 0
   mappend = (+)
 
+getScore :: Score -> Int
+getScore (Score i) = i
 
 score :: Char -> Score
 score 'A' = Score 1
