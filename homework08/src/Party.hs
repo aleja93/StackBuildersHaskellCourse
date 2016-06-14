@@ -61,18 +61,32 @@ nextLevel e (x:xs) = (final , (glCons e final))
      other = nextLevel e xs
      final = best `mappend` (compareTwoList other)
 
-
 ----------------------------------------------------------------------
 -- Exercise 4
 ----------------------------------------------------------------------
 
 maxFun :: Tree Employee -> GuestList
-maxFun = undefined
+maxFun (Node e@(Emp { empFun=f}) [])  = GL [e] f
+maxFun (Node e x)                     = compareTwoList ( nextLevel e ( foo x ( (Node e []) :x) ) )
 
+foo :: [Tree Employee] -> [Tree Employee] -> [(GuestList, GuestList)]
+foo [] (y:_)      = [(mempty, maxFun y)]
+foo (x:xs) (y:ys) = (maxFun x, maxFun y) : (foo xs ys)
+foo _ _           = [(mempty, mempty)]
 
 ----------------------------------------------------------------------
 -- Exercise 5
 ----------------------------------------------------------------------
 
 main :: IO ()
-main = undefined
+main = do
+  company <- readEmployees "company.txt"
+  print company
+
+readEmployees :: FilePath -> IO GuestList
+readEmployees path = do
+  alldata <- readFile path
+  return (stringToTree alldata)
+
+stringToTree :: String -> GuestList
+stringToTree a = mempty
