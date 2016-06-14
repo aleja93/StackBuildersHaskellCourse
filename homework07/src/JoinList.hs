@@ -27,7 +27,7 @@ data JoinList m a = Empty
 --  mappend = (+)
 
 single :: Monoid m => a -> JoinList m a
-single a = Single mempty a -- mempty shloug be 1 for this to work
+single = Single mempty -- mempty shloug be 1 for this to work
 
 (+++) :: Monoid m => JoinList m a -> JoinList m a -> JoinList m a
 (+++) l1 l2 = Append (tag l1 `mappend` tag l2) l1 l2
@@ -76,7 +76,7 @@ dropJ i t@(Single _ _)
   | i==0       = t
   | otherwise  = Empty
 dropJ i (Append _ l r)
-  | m >= i     = dropJ (i) l +++ r
+  | m >= i     = dropJ i l +++ r
   | otherwise  = dropJ (i- m) r
   where
     m  = getSize(size(tag l))
@@ -87,7 +87,7 @@ takeJ i t@(Single _ _)
   | i==0       = Empty
   | otherwise  = t
 takeJ i (Append _ l r)
-  | m >= i     = takeJ (i) l
+  | m >= i     = takeJ i l
   | otherwise  = l +++ takeJ (i- m) r
   where
     m  = getSize(size(tag l))
@@ -105,31 +105,31 @@ scoreLine x = Single (scoreString x) x
 -- Exercise 4
 ----------------------------------------------------------------------
 
-jlToString :: (JoinList (Score, Size) String) -> String
-jlToString Empty        = []
-jlToString (Single _ v) = v
+jlToString :: JoinList (Score, Size) String -> String
+jlToString Empty          = []
+jlToString (Single _ v)   = v
 jlToString (Append _ l r) = jlToString l ++ jlToString r
 
 
-jlFromString :: String -> (JoinList (Score, Size) String)
+jlFromString :: String -> JoinList (Score, Size) String
 jlFromString [] = Empty
 jlFromString a  = Single (scoreString a, Size 1) a
 
-jlCount :: (JoinList (Score, Size) String) -> Int
-jlCount Empty        = 0
-jlCount (Single _ _) = 1
+jlCount :: JoinList (Score, Size) String -> Int
+jlCount Empty          = 0
+jlCount (Single _ _)   = 1
 jlCount (Append _ l r) = jlCount l + jlCount r
 
 
-jlValue :: (JoinList (Score, Size) String) -> Int
-jlValue Empty        = 0
-jlValue (Single _ v) = getScore(scoreString v)
+jlValue :: JoinList (Score, Size) String -> Int
+jlValue Empty          = 0
+jlValue (Single _ v)   = getScore(scoreString v)
 jlValue (Append _ l r) = jlValue l + jlValue r
 
 instance Buffer (JoinList (Score, Size) String) where
   toString          = jlToString
   fromString        = jlFromString
-  line n b          = indexJ n b
-  replaceLine n l b = (takeJ n b) +++ (jlFromString l) +++ (dropJ (n+1) b)
+  line              = indexJ
+  replaceLine n l b = takeJ n b +++ jlFromString l +++ dropJ (n+1) b
   numLines          = jlCount
   value             = jlValue

@@ -80,5 +80,5 @@ score 'z' = Score 10
 score _   = Score 0
 
 scoreString :: String -> Score
-scoreString [] = Score 0
+scoreString []     = Score 0
 scoreString (x:xs) = score x `mappend` scoreString xs
