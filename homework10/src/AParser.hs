@@ -58,11 +58,13 @@ posInt = Parser f
 
 instance Functor Parser where
   fmap :: (a -> b) -> Parser a -> Parser b
-  fmap = undefined
+  fmap f pa = Parser pb where
+      pb x = case runParser pa x of
+                  Nothing    -> Nothing
+                  Just (a,b) -> Just (first f (a,b))
 
-
-first :: (a -> b) -> (a, c) -> (b, c)
-first = undefined
+first :: (a -> b) -> (a,c) -> (b,c)
+first f (x,y) = (f x, y)
 
 
 ----------------------------------------------------------------------
@@ -71,11 +73,15 @@ first = undefined
 
 instance Applicative Parser where
   pure :: a -> Parser a
-  pure = undefined
+  pure a = Parser p where
+    p x = Just (a, x)
+
 
   (<*>) :: Parser (a -> b) -> Parser a -> Parser b
-  (<*>) = undefined
-
+  pf <*> pa = Parser pb where
+          pb x = case runParser pf x of
+              Nothing -> Nothing
+              Just (a, b) -> runParser (fmap a pa) b
 
 ----------------------------------------------------------------------
 -- Exercise 3
@@ -89,7 +95,10 @@ instance Applicative Parser where
 -- Nothing
 
 abParser :: Parser (Char, Char)
-abParser = undefined
+abParser = foo1 <$> char 'a' <*> char 'b'
+
+foo1 :: Char -> Char -> (Char, Char)
+foo1 x y= (x,y)
 
 
 -- |
@@ -100,17 +109,22 @@ abParser = undefined
 -- Nothing
 
 abParser_ :: Parser ()
-abParser_ = undefined
+abParser_ = foo2 <$> char 'a' <*> char 'b'
 
+foo2 :: Char -> Char -> ()
+foo2 _ _= ()
 
 -- |
 --
 -- >>> runParser intPair "12 34"
 -- Just ([12,34],"")
 
-intPair :: Parser [Integer]
-intPair = undefined
 
+intPair :: Parser [Integer]
+intPair = foo3 <$> posInt <*> char ' ' <*> posInt
+
+foo3 :: Integer -> Char -> Integer -> [Integer]
+foo3 x _ y = [x,y]
 
 ----------------------------------------------------------------------
 -- Exercise 4
@@ -118,10 +132,16 @@ intPair = undefined
 
 instance Alternative Parser where
   empty :: Parser a
-  empty = undefined
+  empty = Parser f where
+    f _ = Nothing
 
   (<|>) :: Parser a -> Parser a -> Parser a
-  (<|>) = undefined
+  p1 <|> p2 = Parser c where
+    c x = case r of
+            Nothing -> runParser p2 x
+            otherwise -> r
+            where
+              r= runParser p1 x
 
 
 ----------------------------------------------------------------------
@@ -138,4 +158,7 @@ instance Alternative Parser where
 -- Nothing
 
 intOrUppercase :: Parser ()
-intOrUppercase = undefined
+intOrUppercase = (returnsEmpty <$> posInt) <|> (returnsEmpty <$> satisfy isUpper)
+
+returnsEmpty :: a -> ()
+returnsEmpty _ = ()
