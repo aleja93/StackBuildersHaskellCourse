@@ -26,7 +26,7 @@ import Data.Char
 -- Just ("","abcdeFGh")
 
 zeroOrMore :: Parser a -> Parser [a]
-zeroOrMore = undefined
+zeroOrMore p = oneOrMore p <|> pure []
 
 
 -- |
@@ -37,7 +37,7 @@ zeroOrMore = undefined
 -- Nothing
 
 oneOrMore :: Parser a -> Parser [a]
-oneOrMore = undefined
+oneOrMore p = (:) <$> p <*> zeroOrMore p
 
 
 ----------------------------------------------------------------------
@@ -45,7 +45,7 @@ oneOrMore = undefined
 ----------------------------------------------------------------------
 
 spaces :: Parser String
-spaces = undefined
+spaces = zeroOrMore (satisfy isSpace)
 
 
 -- |
@@ -60,7 +60,7 @@ spaces = undefined
 -- Nothing
 
 ident :: Parser String
-ident = undefined
+ident = (:) <$> satisfy isAlpha <*> zeroOrMore (satisfy isAlphaNum)
 
 
 ----------------------------------------------------------------------
@@ -96,5 +96,15 @@ data SExpr
 -- >>> runParser parseSExpr "(lambda x x"
 -- Nothing
 
+isAtom :: Parser Atom
+isAtom = N <$> posInt <|> I <$> ident
+
+takeOutSpaces :: Parser a -> Parser a
+takeOutSpaces p = spaces *> p <* spaces
+
+takeOutParenthesis ::  Parser a -> Parser a
+takeOutParenthesis p = takeOutSpaces (char '(') *> p <* takeOutSpaces (char ')')
+
 parseSExpr :: Parser SExpr
-parseSExpr = undefined
+parseSExpr = A    <$> takeOutSpaces isAtom <|>
+             Comb <$> takeOutParenthesis ( takeOutSpaces (oneOrMore parseSExpr) )
